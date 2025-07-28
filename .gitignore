@@ -1,0 +1,114 @@
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Playwright specific
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+test-results.json
+traces/
+videos/
+screenshots/
+downloads/
+
+# VS Code settings (keep tasks and launch configs)
+.vscode/
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.iws
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.tmp
+*.temp
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# Temporary files
+*.swp
+*.swo
+
+# VPN logs and temporary files
+vpn-*.log
+vpn-status.txt
+vpn-temp/
+
+# Test artifacts and reports
+allure-results/
+allure-report/
+junit-results/
+html-report/
+
+# Environment specific files
+config.local.json
+*.local
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Build outputs
+dist/
+build/
+out/
+
+# Lock files (uncomment one if you want to exclude)
+# package-lock.json  # Uncomment if using yarn exclusively
+# yarn.lock         # Uncomment if using npm exclusively
