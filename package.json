@@ -1,0 +1,22 @@
+{
+  "name": "depositflowtest",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rustem-gif/DepositFlowTest.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rustem-gif/DepositFlowTest/issues"
+  },
+  "homepage": "https://github.com/Rustem-gif/DepositFlowTest#readme",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.54.1",
+    "@types/node": "^24.1.0"
+  }
+}
