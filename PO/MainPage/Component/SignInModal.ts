@@ -1,7 +1,6 @@
 import {Locator, Page} from "@playwright/test";
-import BaseComponent from "../../../Components/BaseComponent";
-import SignUpModal from "./SignUpModal";
-import {PasswordRecovery} from "../../PasswordRecovery/PasswordRecovery";
+import BaseComponent from "../../Components/BaseComponent";
+
 
 export default class SignInModal extends BaseComponent {
     private emailInput: Locator
@@ -51,11 +50,6 @@ export default class SignInModal extends BaseComponent {
 
     async clickLoginWithGoogle(): Promise<void> {
         await this.loginWithGoogleButton.click()
-    }
-
-    async clickCreateAccount(): Promise<SignUpModal> {
-        await this.createAccountButton.click()
-        return new SignUpModal(this.page)
     }
 
     async clickOnPasswordVisibilityButton(): Promise<void> {

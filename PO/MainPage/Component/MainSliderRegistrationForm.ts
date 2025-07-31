@@ -1,4 +1,4 @@
-import BaseComponent from "../../../Components/BaseComponent";
+import BaseComponent from "../../Components/BaseComponent";
 import {Locator, Page} from "@playwright/test";
 
 export default class MainSliderRegistrationForm extends BaseComponent {

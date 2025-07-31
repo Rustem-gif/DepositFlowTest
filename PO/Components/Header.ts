@@ -1,8 +1,8 @@
 import BaseComponent from "./BaseComponent";
 import {Locator, Page} from "@playwright/test";
-import SignInModal from "../MainPage/Component/SignInModal";
-import SignUpModal from "../MainPage/Component/SignUpModal";
 import {DepModal} from "./DepModal";
+import SignUpModal from "../MainPage/Component/SignUpModal";
+import SignInModal from "../MainPage/Component/SignInModal";
 
 
 export default class Header extends BaseComponent {
@@ -166,24 +166,6 @@ export default class Header extends BaseComponent {
             return allText.split('\n').map(code => code.trim())
         })
     }
-
-    async getCurrencies(){
-        return await this.page.evaluate(() => {
-            const currencyNodes = document.querySelectorAll('.balance-select__dropdown > [role= "option"] > span')
-
-            const array = []
-
-            for (let element of currencyNodes){
-
-                const text = (element as HTMLElement).innerText
-
-                array.push(text)
-            }
-
-            return array
-        })
-    }
-
     get getDepositButton(): Locator {
         return this.depositButton
     }

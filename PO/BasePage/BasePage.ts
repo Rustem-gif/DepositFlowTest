@@ -1,18 +1,12 @@
 import {Page, Locator} from "@playwright/test";
 import Header from "../Components/Header";
-import Footer from "../Components/Footer";
-import SidebarMenu from "../Components/SidebarMenu";
-import CategoryDropdown from "../MainPage/Component/CategoryDropdown";
-import { axeScan } from "axe-playwright-report";
 
 export default class BasePage {
   readonly page: Page
-  public header: Header
-  public footer: Footer
-  public sideBarMenu: SidebarMenu
+  readonly header: Header
   private acceptCookiesButton: Locator
   readonly scrollUpButton: Locator
-  public categoryDropdown: CategoryDropdown
+
 
   constructor(page: Page) {
     this.page = page;
@@ -21,9 +15,7 @@ export default class BasePage {
     this.acceptCookiesButton = this.page.locator('#accept_initial_notification_button')
 
     this.header = new Header(this.page)
-    this.footer = new Footer(this.page)
-    this.sideBarMenu = new SidebarMenu(this.page)
-    this.categoryDropdown = new CategoryDropdown(this.page)
+   
   }
 
   
