@@ -1,5 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
-
+import generateCustomLayoutAsync from "./my_custom_layout";
+import dotenv from 'dotenv';
+import path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -19,19 +22,36 @@ export default defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
-  retries: 2,
+  retries: 1,
   /* Opt out of parallel tests on CI. */
   workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  reporter: [
+    ['list'],
+    [
+       "./node_modules/playwright-slack-report/dist/src/SlackReporter.js",
+      {
+        SLACK_BOT_USER_OAUTH_TOKEN: process.env.SLACK_BOT_USER_OAUTH_TOKEN,
+        channels: ['test-reporter'],
+        successChannel: ['test-reporter'],
+        layoutAsync: generateCustomLayoutAsync,
+        attachFiles: true,
+        attachHtmlReport: true,
+        showInThread: true,
+      },
+    ],
+    ['html'],
+  ],
+
+
+
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'http://kingbillycasino.com',
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on',
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    screenshot: 'on',
+    video: 'on',
     
     /* Increase timeouts for VPN operations */
     navigationTimeout: 30000,

@@ -91,6 +91,8 @@ test.describe("Deposit Flow Test", () => {
         expect(depositModal.getDepModalError).toBeVisible({ timeout: 5000 });
     
         await expect(page).toHaveScreenshot('au_credit_card.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
+        const auCreditCardScreenshot = await page.screenshot({ fullPage: false });
+        await test.info().attach('au_credit_card.png', { body: auCreditCardScreenshot, contentType: 'image/png' });
     });
 
     test('Verify deposit flow AU Neoserf', async ({ page }) => {
@@ -118,6 +120,8 @@ test.describe("Deposit Flow Test", () => {
         ).toBe(true);
         expect(neoserfPage.getNeosurfPageLogo).toBeVisible();
         await expect(page).toHaveScreenshot('au_neoserf.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
+        const auNeoserfScreenshot = await page.screenshot({ fullPage: false });
+        await test.info().attach('au_neoserf.png', { body: auNeoserfScreenshot, contentType: 'image/png' });
 
     })
 
@@ -135,6 +139,8 @@ test.describe("Deposit Flow Test", () => {
         await mainPage.navTo('/');
         await mainPage.clickAcceptCookies();
         await expect(page).toHaveScreenshot('nz_credit_card.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
+        const nzCreditCardScreenshot = await page.screenshot({ fullPage: false });
+        await test.info().attach('nz_credit_card.png', { body: nzCreditCardScreenshot, contentType: 'image/png' });
         signUpModal = await mainPage.header.clickCreateAccount();
         randomEmail = await signUpModal.generateRandomEmail(13);
         await signUpModal.createAccount({ email: randomEmail, password });
@@ -179,6 +185,8 @@ test.describe("Deposit Flow Test", () => {
         await depositModal.page.waitForTimeout(30000);
         expect(depositModal.getPaysafeCardModal).toBeVisible({ timeout: 5000 });
         await expect(page).toHaveScreenshot('nz_paysafecard.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
+        const nzPaysafecardScreenshot = await page.screenshot({ fullPage: false });
+        await test.info().attach('nz_paysafecard.png', { body: nzPaysafecardScreenshot, contentType: 'image/png' });
     });
 
     
@@ -206,6 +214,8 @@ test.describe("Deposit Flow Test", () => {
         expect(await mainPage.getPageUrl()).toContain('interac.express-connect.com');
         expect(mainPage.page.locator('.otherPayments > p')).toContainText('Select your bank');
         await expect(page).toHaveScreenshot('ca_interac.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
+        const caInteracScreenshot = await page.screenshot({ fullPage: false });
+        await test.info().attach('ca_interac.png', { body: caInteracScreenshot, contentType: 'image/png' });
 
     });
 
@@ -223,6 +233,8 @@ test.describe("Deposit Flow Test", () => {
         await mainPage.navTo('/');
         await mainPage.clickAcceptCookies();
         await expect(page).toHaveScreenshot('ca_credit_card.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
+        const caCreditCardScreenshot = await page.screenshot({ fullPage: false });
+        await test.info().attach('ca_credit_card.png', { body: caCreditCardScreenshot, contentType: 'image/png' });
         signInModal = await mainPage.header.clickSignIn();
         await signInModal.fillEmail(testData.CA.credentials.email);
         await signInModal.fillPassword(testData.CA.credentials.password);
@@ -264,6 +276,8 @@ test.describe("Deposit Flow Test", () => {
         expect(await mainPage.getPageUrl()).toContain('rapidob.com');
         expect(mainPage.page.locator('#shadow-content .header-back-bank-name')).toContainText('Sparkasse');
         await expect(page).toHaveScreenshot('de_sparkasse.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
+        const deSparkasseScreenshot = await page.screenshot({ fullPage: false });
+        await test.info().attach('de_sparkasse.png', { body: deSparkasseScreenshot, contentType: 'image/png' });
     });
 
     test('Verify deposit flow DE deutscheBank', async ({ page }) => {
@@ -290,6 +304,8 @@ test.describe("Deposit Flow Test", () => {
         expect(await mainPage.getPageUrl()).toContain('rapidob.com');
         expect(mainPage.page.locator('#shadow-content .header-back-bank-name')).toContainText('Deutsche Bank');
         await expect(page).toHaveScreenshot('de_deutschebank.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
+        const deDeutscheBankScreenshot = await page.screenshot({ fullPage: false });
+        await test.info().attach('de_deutschebank.png', { body: deDeutscheBankScreenshot, contentType: 'image/png' });
     });
 
     test('Verify deposit flow DE postbank', async ({ page }) => {
@@ -316,6 +332,8 @@ test.describe("Deposit Flow Test", () => {
         expect(await mainPage.getPageUrl()).toContain('rapidob.com');
         expect(mainPage.page.locator('#shadow-content .header-back-bank-name')).toContainText('Postbank');
         await expect(page).toHaveScreenshot('de_postbank.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
+        const dePostbankScreenshot = await page.screenshot({ fullPage: false });
+        await test.info().attach('de_postbank.png', { body: dePostbankScreenshot, contentType: 'image/png' });
     });
 
     test('Verify deposit flow revolut', async ({ page }) => {
@@ -342,6 +360,8 @@ test.describe("Deposit Flow Test", () => {
         expect(await mainPage.getPageUrl()).toContain('rapidob.com');
         expect(mainPage.page.locator('#shadow-content .header-back-bank-name')).toContainText('Revolut');
         await expect(page).toHaveScreenshot('de_revolut.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
+        const deRevolutScreenshot = await page.screenshot({ fullPage: false });
+        await test.info().attach('de_revolut.png', { body: deRevolutScreenshot, contentType: 'image/png' });
     });
 
     test('Verify deposit flow nodaPay', async ({ page }) => {
@@ -368,5 +388,7 @@ test.describe("Deposit Flow Test", () => {
         expect(await mainPage.getPageUrl()).toContain('rapidob.com');
         expect(await mainPage.page.locator('.modal-content')).toBeVisible();
         await expect(page).toHaveScreenshot('de_nodapay.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
+        const deNodapayScreenshot = await page.screenshot({ fullPage: false });
+        await test.info().attach('de_nodapay.png', { body: deNodapayScreenshot, contentType: 'image/png' });
     });
 });
