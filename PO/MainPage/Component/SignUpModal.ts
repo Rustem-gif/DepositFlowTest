@@ -166,6 +166,11 @@ export default class SignUpModal extends BaseComponent{
         return `${text1} ${text2}`
     }
 
+    async generateRandomEmail(number: number): Promise<string> {
+        number = number || 10; 
+        const randomString = Math.random().toString(36).substring(2, 2 + number);
+        return `automaton_${randomString}@example.com`;
+    }
 
     get getSignUpModal() {
         return this.signUpModal;

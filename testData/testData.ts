@@ -1,4 +1,4 @@
-const testData = {
+export const testData = {
       AU: {
         vpnLocation: 'Australia - Melbourne',
         credentials: {
@@ -13,11 +13,12 @@ const testData = {
             cvv: '111',
             firstName: 'Frodo',
             lastName: 'Bagins',
-            dob: '11/11/1990',
+            dob: '1990-11-11',
+            address: '123 Main St',
             state: 'Australian Capital Territory',
             city: 'Blackwood',
             postalCode: '2345',
-            mobileNumber: '+61 430 055 447'
+            mobileNumber: '430 055 447'
           },
           neoserf: {
             minAmount: 25
@@ -26,7 +27,7 @@ const testData = {
       },
 
       NZ: {
-        vpnLocation: 'New Zealand - Auckland',
+        vpnLocation: 'New Zealand',
         credentials: {
           email: 'NZ_dep@kingbilly.xyz',
           password: '1qaz2wsx'
@@ -41,8 +42,9 @@ const testData = {
             lastName: 'Bagins',
             dob: '11/11/1990',
             city: 'Blackwood',
+            address: '123 Main St',
             postalCode: '7843',
-            mobileNumber: '+64 21 123 4567'
+            mobileNumber: '21 123 4567'
           },
           paysafecard: {
             accountId: 'test-paysafe-123'
@@ -53,7 +55,7 @@ const testData = {
       CA: {
         vpnLocation: 'Canada - Montreal',
         credentials: {
-          email: 'NZ_dep@kingbilly.xyz',
+          email: 'CA_dep@kingbilly.xyz',
           password: '1qaz2wsx'
         },
         paymentMethods: {
@@ -68,7 +70,7 @@ const testData = {
             state: 'New Brunswick',
             city: 'Blackwood',
             postalCode: 'K0G 0A0',
-            mobileNumber: '+1 416 555 0123'
+            mobileNumber: '416 555 0123'
           },
           interac: {
             email: 'test.interac@example.com'
@@ -93,7 +95,7 @@ const testData = {
             dob: '11/11/1990',
             city: 'Berlin',
             postalCode: '10176',
-            mobileNumber: '+49 157 11345678'
+            mobileNumber: '157 11345678'
           },
           noda: {
             email: 'test.noda@example.com'

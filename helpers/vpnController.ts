@@ -4,7 +4,7 @@ import { promisify } from 'util';
 const execAsync = promisify(exec);
 
 export class VpnController {
-  private expressvpnPath = 'C:/Program Files (x86)/ExpressVPN/services/ExpressVPNCmd.exe';
+  private expressvpnPath = 'C:/Program Files (x86)/ExpressVPN/services/ExpressVPN.CLI';
 
   constructor() {}
 
