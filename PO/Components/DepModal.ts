@@ -140,7 +140,7 @@ export class DepModal extends BaseComponent {
 
    async selectDateFromDatePicker(): Promise<void> {
     await this.dateOfBirthInput.click();
-    await this.page.locator('.react-datepicker__day.react-datepicker__day--029.react-datepicker__day--weekend:nth-of-type(1)').click();
+    await this.page.locator('.react-datepicker__month > .react-datepicker__week  > .react-datepicker__day[aria-disabled="false"]:nth-of-type(1)').first().click();
     }
 
     async chooseSatateAu(){

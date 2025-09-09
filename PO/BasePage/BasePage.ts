@@ -21,6 +21,7 @@ export default class BasePage {
   
   async navTo(url: string): Promise<void> {
     await this.page.goto(url);
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   async sleep(miliseconds: number): Promise<void> {

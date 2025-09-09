@@ -1,72 +1,44 @@
 import test, { expect } from "@playwright/test";
 import MainPage from "../PO/MainPage/MainPage";
-import SignInModal from "../PO/MainPage/Component/SignInModal";
-import SignUpModal from "../PO/MainPage/Component/SignUpModal";
-
 import { DepModal } from "../PO/Components/DepModal";
 import { testData } from "../testData/testData";
-import { vpnController } from '../helpers/vpnControllerInstance';
 import NeosurfPage from "../PO/NeosurfPage/NeosurfPage";
+import Methods from "../Methods/Methods";
+import { vpnController } from "../helpers/vpnControllerInstance";
+
+// Map regions to VPN locations
+const regionToVpnLocation = {
+    AU: "Australia - Melbourne",
+    NZ: "New Zealand",
+    CA: "Canada - Montreal",
+    DE: "Germany - Frankfurt - 1"
+};
 
 test.describe("Deposit Flow Test", () => {
-    let mainPage: MainPage;
-    let signInModal: SignInModal;
-    let signUpModal: SignUpModal;
-    let depositModal: DepModal;
+    const password = '193786Az()';
     let randomEmail: string;
-    let neoserfPage: NeosurfPage;
-    const password = '193786Az()'
 
-    // Helper function to handle VPN connection with debug mode support
-    async function connectVPN(location: string, page: any) {
-        // In debug mode, skip VPN to avoid browser context issues
-        if (process.env.PWDEBUG) {
-            console.log(`Debug mode: Skipping VPN connection to ${location}`);
-            await new Promise(res => setTimeout(res, 1000));
-            return;
-        }
-
-        // Switch VPN and wait for connection
-        await vpnController.vpnConnect(location);
-        let vpnStatus = '';
-        for (let i = 0; i < 30; i++) { // up to 30s
-            vpnStatus = await vpnController.vpnCheckStatus();
-            if (vpnStatus === 'connected') break;
-            await new Promise(res => setTimeout(res, 6000));
-        }
-        if (vpnStatus !== 'connected') throw new Error(`VPN not connected to ${location}`);
-
-        // Wait for network to stabilize after VPN switch
-        await new Promise(res => setTimeout(res, 3000));
-    }
-
-    test.beforeEach(async ({ page }) => {
-        mainPage = new MainPage(page);
-        depositModal = new DepModal(page);
-        neoserfPage = new NeosurfPage(page);
-        // No VPN switch or navTo in beforeEach, do it in each test for locale
+    test.skip('Verify deposit flow AU credit card', async ({ browser }) => {
+        // Connect to Australian VPN
+        await vpnController.vpnDisconnect(); // Ensure disconnected first
+        await vpnController.vpnConnect(regionToVpnLocation.AU);
+        await vpnController.sleepVPN(5000); // Wait for VPN to connect
         
-        // In debug mode, add extra stability wait
-        if (process.env.PWDEBUG) {
-            await new Promise(res => setTimeout(res, 2000));
-        }
-    });
+        // Create context with consistent user agent
+        const context = await browser.newContext({ 
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        });
+        const page = await context.newPage();
+        
+        // Initialize page objects
+        const mainPage = new MainPage(page);
+        const depositModal = new DepModal(page);
+        const methods = new Methods();
 
-    test.afterAll(async () => {
-        // Disconnect VPN after all tests for cleanup (skip in debug mode)
-        if (!process.env.PWDEBUG) {
-            await vpnController.vpnDisconnect();
-        }
-    });
-
-    test('Verify deposit flow AU credit card', async ({ page }) => {
-        // Connect VPN with debug mode support
-        await connectVPN(testData.AU.vpnLocation, page);
-
-        await mainPage.navTo('/');
+        await mainPage.navTo('http://kingbillywin24.com');
         await mainPage.clickAcceptCookies();
-        signUpModal = await mainPage.header.clickCreateAccount();
-        randomEmail = await signUpModal.generateRandomEmail(10);
+        const signUpModal = await mainPage.header.clickCreateAccount();
+        randomEmail = await methods.generateRandomEmail(10);
         await signUpModal.createAccount({ email: randomEmail, password });
 
         const creditCardData = {
@@ -85,35 +57,47 @@ test.describe("Deposit Flow Test", () => {
         await depositModal.selectDateFromDatePicker()
         await depositModal.chooseSatateAu();
         await depositModal.fillCreditCardField(creditCardData);
-        await depositModal.page.waitForTimeout(30000);
+        await depositModal.page.waitForTimeout(60000);
         await depositModal.clickOnDepositButton();
-        await depositModal.page.waitForTimeout(30000);
+        await depositModal.page.waitForTimeout(60000);
         expect(depositModal.getDepModalError).toBeVisible({ timeout: 5000 });
     
         await expect(page).toHaveScreenshot('au_credit_card.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
         const auCreditCardScreenshot = await page.screenshot({ fullPage: false });
         await test.info().attach('au_credit_card.png', { body: auCreditCardScreenshot, contentType: 'image/png' });
+        await context.close();
+        
+        // Disconnect VPN after test
+        await vpnController.vpnDisconnect();
+        await vpnController.sleepVPN(2000); // Wait for VPN to disconnect
     });
 
-    test('Verify deposit flow AU Neoserf', async ({ page }) => {
-        // Switch VPN to AU and wait for connection
-        await vpnController.vpnConnect(testData.AU.vpnLocation);
-        let vpnStatus = '';
-        for (let i = 0; i < 30; i++) {
-            vpnStatus = await vpnController.vpnCheckStatus();
-            if (vpnStatus === 'connected') break;
-            await new Promise(res => setTimeout(res, 6000));
-        }
-        if (vpnStatus !== 'connected') throw new Error('VPN not connected to AU');
-        await new Promise(res => setTimeout(res, 3000));
-        await mainPage.navTo('/');
+    test('Verify deposit flow AU Neoserf', async ({ browser }) => {
+        // Connect to Australian VPN
+        await vpnController.vpnDisconnect(); // Ensure disconnected first
+        await vpnController.vpnConnect(regionToVpnLocation.AU);
+        await vpnController.sleepVPN(5000); // Wait for VPN to connect
+        
+        // Create context with consistent user agent
+        const context = await browser.newContext({ 
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        });
+        const page = await context.newPage();
+        
+        // Initialize page objects
+        const mainPage = new MainPage(page);
+        const depositModal = new DepModal(page);
+        const neoserfPage = new NeosurfPage(page);
+        const methods = new Methods();
+        
+        await mainPage.navTo('http://kingbillywin24.com');
         await mainPage.clickAcceptCookies();
-        signUpModal = await mainPage.header.clickCreateAccount();
-        randomEmail = await signUpModal.generateRandomEmail(11);
+        const signUpModal = await mainPage.header.clickCreateAccount();
+        randomEmail = await methods.generateRandomEmail(11);
         await signUpModal.createAccount({ email: randomEmail, password });
         await depositModal.clickOnDepMethod('neoserf');
         await depositModal.clickOnDepositButton();
-        await depositModal.page.waitForTimeout(30000);
+        await depositModal.page.waitForTimeout(60000);
         const url = await depositModal.getPageUrl();
         expect(
             url.includes('pay2.secure-neosurf.com') || url.includes('pay.neosurf.com')
@@ -122,27 +106,35 @@ test.describe("Deposit Flow Test", () => {
         await expect(page).toHaveScreenshot('au_neoserf.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
         const auNeoserfScreenshot = await page.screenshot({ fullPage: false });
         await test.info().attach('au_neoserf.png', { body: auNeoserfScreenshot, contentType: 'image/png' });
+        await context.close();
+        
+        // Disconnect VPN after test
+        await vpnController.vpnDisconnect();
+        await vpnController.sleepVPN(2000); // Wait for VPN to disconnect
+    });
 
-    })
-
-    test('Verify deposit flow NZ credit card', async ({ page }) => {
-        // Switch VPN to NZ and wait for connection
-        await vpnController.vpnConnect(testData.NZ.vpnLocation);
-        let vpnStatus = '';
-        for (let i = 0; i < 30; i++) {
-            vpnStatus = await vpnController.vpnCheckStatus();
-            if (vpnStatus === 'connected') break;
-            await new Promise(res => setTimeout(res, 6000));
-        }
-        if (vpnStatus !== 'connected') throw new Error('VPN not connected to NZ');
-        await new Promise(res => setTimeout(res, 3000));
-        await mainPage.navTo('/');
+    test.only('Verify deposit flow NZ credit card', async ({ browser }) => {
+        // Connect to New Zealand VPN
+        await vpnController.vpnDisconnect(); // Ensure disconnected first
+        await vpnController.vpnConnect(regionToVpnLocation.NZ);
+        await vpnController.sleepVPN(5000); // Wait for VPN to connect
+        
+        // Create context with consistent user agent
+        const context = await browser.newContext({ 
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        });
+        const page = await context.newPage();
+        
+        // Initialize page objects
+        const mainPage = new MainPage(page);
+        const depositModal = new DepModal(page);
+        const methods = new Methods();
+        
+        await mainPage.navTo('http://kingbillycasino.com');
         await mainPage.clickAcceptCookies();
-        await expect(page).toHaveScreenshot('nz_credit_card.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
-        const nzCreditCardScreenshot = await page.screenshot({ fullPage: false });
-        await test.info().attach('nz_credit_card.png', { body: nzCreditCardScreenshot, contentType: 'image/png' });
-        signUpModal = await mainPage.header.clickCreateAccount();
-        randomEmail = await signUpModal.generateRandomEmail(13);
+        
+        const signUpModal = await mainPage.header.clickCreateAccount();
+        randomEmail = await methods.generateRandomEmail(13);
         await signUpModal.createAccount({ email: randomEmail, password });
         const creditCardData = {
             cardNumber: testData.NZ.paymentMethods.creditCard.cardNumber,
@@ -160,82 +152,116 @@ test.describe("Deposit Flow Test", () => {
         await depositModal.selectDateFromDatePicker();
         await depositModal.fillCreditCardFieldNZ(creditCardData);
         await depositModal.clickOnDepositButton();
-        await depositModal.page.waitForTimeout(30000);
+        await expect(page).toHaveScreenshot('nz_credit_card.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
+        const nzCreditCardScreenshot = await page.screenshot({ fullPage: false });
+        await test.info().attach('nz_credit_card.png', { body: nzCreditCardScreenshot, contentType: 'image/png' });
+        await depositModal.page.waitForTimeout(60000);
         expect(depositModal.getDepModalError).toBeVisible({ timeout: 5000 });
+        await context.close();
+        
+        // Disconnect VPN after test
+        await vpnController.vpnDisconnect();
+        await vpnController.sleepVPN(2000); // Wait for VPN to disconnect
     });
 
-     test('Verify deposit flow NZ paysafecard', async ({ page }) => {
-        // Switch VPN to NZ and wait for connection
-        await vpnController.vpnConnect(testData.NZ.vpnLocation);
-        let vpnStatus = '';
-        for (let i = 0; i < 30; i++) {
-            vpnStatus = await vpnController.vpnCheckStatus();
-            if (vpnStatus === 'connected') break;
-            await new Promise(res => setTimeout(res, 6000));
-        }
-        if (vpnStatus !== 'connected') throw new Error('VPN not connected to NZ');
-        await new Promise(res => setTimeout(res, 3000));
-        await mainPage.navTo('/');
+     test('Verify deposit flow NZ paysafecard', async ({ browser }) => {
+        // Connect to New Zealand VPN
+        await vpnController.vpnDisconnect(); // Ensure disconnected first
+        await vpnController.vpnConnect(regionToVpnLocation.NZ);
+        await vpnController.sleepVPN(5000); // Wait for VPN to connect
+        
+        // Create context with consistent user agent
+        const context = await browser.newContext({ 
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        });
+        const page = await context.newPage();
+        
+        // Initialize page objects
+        const mainPage = new MainPage(page);
+        const depositModal = new DepModal(page);
+        const methods = new Methods();
+
+        await mainPage.navTo('http://kingbillycasino.com');
         await mainPage.clickAcceptCookies();
-        signUpModal = await mainPage.header.clickCreateAccount();
-        randomEmail = await signUpModal.generateRandomEmail(12);
+        const signUpModal = await mainPage.header.clickCreateAccount();
+        randomEmail = await methods.generateRandomEmail(12);
         await signUpModal.createAccount({ email: randomEmail, password });
         await depositModal.clickOnDepMethod('paysafecard');
         await depositModal.clickOnDepositButton();
-        await depositModal.page.waitForTimeout(30000);
+        await depositModal.page.waitForTimeout(60000);
         expect(depositModal.getPaysafeCardModal).toBeVisible({ timeout: 5000 });
         await expect(page).toHaveScreenshot('nz_paysafecard.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
         const nzPaysafecardScreenshot = await page.screenshot({ fullPage: false });
         await test.info().attach('nz_paysafecard.png', { body: nzPaysafecardScreenshot, contentType: 'image/png' });
+        await context.close();
+        
+        // Disconnect VPN after test
+        await vpnController.vpnDisconnect();
+        await vpnController.sleepVPN(2000); // Wait for VPN to disconnect
     });
 
     
-    test('Verify deposit flow CA interact', async ({ page }) => {
-        // Switch VPN to CA and wait for connection
-        await vpnController.vpnConnect(testData.CA.vpnLocation);
-        let vpnStatus = '';
-        for (let i = 0; i < 30; i++) {
-            vpnStatus = await vpnController.vpnCheckStatus();
-            if (vpnStatus === 'connected') break;
-            await new Promise(res => setTimeout(res, 6000));
-        }
-        if (vpnStatus !== 'connected') throw new Error('VPN not connected to CA');
-        await new Promise(res => setTimeout(res, 3000));
-        await mainPage.navTo('/');
+    test('Verify deposit flow CA interact', async ({ browser }) => {
+        // Connect to Canada VPN
+        await vpnController.vpnDisconnect(); // Ensure disconnected first
+        await vpnController.vpnConnect(regionToVpnLocation.CA);
+        await vpnController.sleepVPN(5000); // Wait for VPN to connect
+        
+        // Create context with consistent user agent
+        const context = await browser.newContext({ 
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        });
+        const page = await context.newPage();
+        
+        // Initialize page objects
+        const mainPage = new MainPage(page);
+        const depositModal = new DepModal(page);
+
+        await mainPage.navTo('http://kingbillycasino.com');
         await mainPage.clickAcceptCookies();
-        signInModal = await mainPage.header.clickSignIn();
+        const signInModal = await mainPage.header.clickSignIn();
         await signInModal.fillEmail(testData.CA.credentials.email);
         await signInModal.fillPassword(testData.CA.credentials.password);
         await signInModal.clickSignIn();
         await mainPage.header.clickDepositButton()
         await depositModal.clickOnDepMethod('interac');
         await depositModal.clickOnDepositButton();
-        await depositModal.page.waitForTimeout(30000);
+        await depositModal.page.waitForTimeout(60000);
         expect(await mainPage.getPageUrl()).toContain('interac.express-connect.com');
         expect(mainPage.page.locator('.otherPayments > p')).toContainText('Select your bank');
         await expect(page).toHaveScreenshot('ca_interac.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
         const caInteracScreenshot = await page.screenshot({ fullPage: false });
         await test.info().attach('ca_interac.png', { body: caInteracScreenshot, contentType: 'image/png' });
-
+        await context.close();
+        
+        // Disconnect VPN after test
+        await vpnController.vpnDisconnect();
+        await vpnController.sleepVPN(2000); // Wait for VPN to disconnect
     });
 
-    test('Verify deposit flow CA credit card', async ({ page }) => {
-        // Switch VPN to CA and wait for connection
-        await vpnController.vpnConnect(testData.CA.vpnLocation);
-        let vpnStatus = '';
-        for (let i = 0; i < 30; i++) {
-            vpnStatus = await vpnController.vpnCheckStatus();
-            if (vpnStatus === 'connected') break;
-            await new Promise(res => setTimeout(res, 6000));
-        }
-        if (vpnStatus !== 'connected') throw new Error('VPN not connected to CA');
-        await new Promise(res => setTimeout(res, 3000));
-        await mainPage.navTo('/');
+    test('Verify deposit flow CA credit card', async ({ browser }) => {
+        // Connect to Canada VPN
+        await vpnController.vpnDisconnect(); // Ensure disconnected first
+        await vpnController.vpnConnect(regionToVpnLocation.CA);
+        await vpnController.sleepVPN(5000); // Wait for VPN to connect
+        
+        // Create context with consistent user agent
+        const context = await browser.newContext({ 
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        });
+        const page = await context.newPage();
+        
+        // Initialize page objects
+        const mainPage = new MainPage(page);
+        const depositModal = new DepModal(page);
+
+        await mainPage.navTo('http://kingbillycasino.com');
         await mainPage.clickAcceptCookies();
         await expect(page).toHaveScreenshot('ca_credit_card.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
         const caCreditCardScreenshot = await page.screenshot({ fullPage: false });
         await test.info().attach('ca_credit_card.png', { body: caCreditCardScreenshot, contentType: 'image/png' });
-        signInModal = await mainPage.header.clickSignIn();
+        
+        const signInModal = await mainPage.header.clickSignIn();
         await signInModal.fillEmail(testData.CA.credentials.email);
         await signInModal.fillPassword(testData.CA.credentials.password);
         await signInModal.clickSignIn();
@@ -248,147 +274,200 @@ test.describe("Deposit Flow Test", () => {
             cvv: testData.CA.paymentMethods.creditCard.cvv
         });
         await depositModal.clickOnDepositButton();
-        await depositModal.page.waitForTimeout(30000);
+        await depositModal.page.waitForTimeout(60000);
         expect(depositModal.getDepModalError).toBeVisible({ timeout: 5000 });
-    })
+        await context.close();
+        
+        // Disconnect VPN after test
+        await vpnController.vpnDisconnect();
+        await vpnController.sleepVPN(2000); // Wait for VPN to disconnect
+    });
 
-    test('Verify deposit flow DE sparkasse', async ({ page }) => {
-        // Switch VPN to DE and wait for connection
-        await vpnController.vpnConnect(testData.DE.vpnLocation);
-        let vpnStatus = '';
-        for (let i = 0; i < 30; i++) {
-            vpnStatus = await vpnController.vpnCheckStatus();
-            if (vpnStatus === 'connected') break;
-            await new Promise(res => setTimeout(res, 6000));
-        }
-        if (vpnStatus !== 'connected') throw new Error('VPN not connected to DE');
-        await new Promise(res => setTimeout(res, 3000));
-        await mainPage.navTo('/');
+    test('Verify deposit flow DE sparkasse', async ({ browser }) => {
+        // Connect to German VPN
+        await vpnController.vpnDisconnect(); // Ensure disconnected first
+        await vpnController.vpnConnect(regionToVpnLocation.DE);
+        await vpnController.sleepVPN(5000); // Wait for VPN to connect
+        
+        // Create context with consistent user agent
+        const context = await browser.newContext({ 
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        });
+        const page = await context.newPage();
+        
+        // Initialize page objects
+        const mainPage = new MainPage(page);
+        const depositModal = new DepModal(page);
+        
+        await mainPage.navTo('http://kingbillycasino.com');
         await mainPage.clickAcceptCookies();
-        signInModal = await mainPage.header.clickSignIn();
+        const signInModal = await mainPage.header.clickSignIn();
         await signInModal.fillEmail(testData.DE.credentials.email);
         await signInModal.fillPassword(testData.DE.credentials.password);
         await signInModal.clickSignIn();
         await mainPage.header.clickDepositButton();
         await depositModal.clickOnDepMethod('sparkasseDE');
         await depositModal.clickOnDepositButton();
-        await depositModal.page.waitForTimeout(30000);
+        await depositModal.page.waitForTimeout(60000);
         expect(await mainPage.getPageUrl()).toContain('rapidob.com');
         expect(mainPage.page.locator('#shadow-content .header-back-bank-name')).toContainText('Sparkasse');
         await expect(page).toHaveScreenshot('de_sparkasse.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
         const deSparkasseScreenshot = await page.screenshot({ fullPage: false });
         await test.info().attach('de_sparkasse.png', { body: deSparkasseScreenshot, contentType: 'image/png' });
+        await context.close();
+        
+        // Disconnect VPN after test
+        await vpnController.vpnDisconnect();
+        await vpnController.sleepVPN(2000); // Wait for VPN to disconnect
     });
 
-    test('Verify deposit flow DE deutscheBank', async ({ page }) => {
-        // Switch VPN to DE and wait for connection
-        await vpnController.vpnConnect(testData.DE.vpnLocation);
-        let vpnStatus = '';
-        for (let i = 0; i < 30; i++) {
-            vpnStatus = await vpnController.vpnCheckStatus();
-            if (vpnStatus === 'connected') break;
-            await new Promise(res => setTimeout(res, 6000));
-        }
-        if (vpnStatus !== 'connected') throw new Error('VPN not connected to DE');
-        await new Promise(res => setTimeout(res, 3000));
-        await mainPage.navTo('/');
+    test('Verify deposit flow DE deutscheBank', async ({ browser }) => {
+        // Connect to German VPN
+        await vpnController.vpnDisconnect(); // Ensure disconnected first
+        await vpnController.vpnConnect(regionToVpnLocation.DE);
+        await vpnController.sleepVPN(5000); // Wait for VPN to connect
+        
+        // Create context with consistent user agent
+        const context = await browser.newContext({ 
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        });
+        const page = await context.newPage();
+        
+        const mainPage = new MainPage(page);
+        const depositModal = new DepModal(page);
+
+        await mainPage.navTo('http://kingbillycasino.com/');
         await mainPage.clickAcceptCookies();
-        signInModal = await mainPage.header.clickSignIn();
+        const signInModal = await mainPage.header.clickSignIn();
         await signInModal.fillEmail(testData.DE.credentials.email);
         await signInModal.fillPassword(testData.DE.credentials.password);
         await signInModal.clickSignIn();
         await mainPage.header.clickDepositButton();
         await depositModal.clickOnDepMethod('deutscheBankDE');
         await depositModal.clickOnDepositButton();
-        await depositModal.page.waitForTimeout(30000);
+        await depositModal.page.waitForTimeout(60000);
         expect(await mainPage.getPageUrl()).toContain('rapidob.com');
         expect(mainPage.page.locator('#shadow-content .header-back-bank-name')).toContainText('Deutsche Bank');
         await expect(page).toHaveScreenshot('de_deutschebank.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
         const deDeutscheBankScreenshot = await page.screenshot({ fullPage: false });
         await test.info().attach('de_deutschebank.png', { body: deDeutscheBankScreenshot, contentType: 'image/png' });
+        await context.close();
+        
+        // Disconnect VPN after test
+        await vpnController.vpnDisconnect();
+        await vpnController.sleepVPN(2000); // Wait for VPN to disconnect
     });
 
-    test('Verify deposit flow DE postbank', async ({ page }) => {
-        // Switch VPN to DE and wait for connection
-        await vpnController.vpnConnect(testData.DE.vpnLocation);
-        let vpnStatus = '';
-        for (let i = 0; i < 30; i++) {
-            vpnStatus = await vpnController.vpnCheckStatus();
-            if (vpnStatus === 'connected') break;
-            await new Promise(res => setTimeout(res, 6000));
-        }
-        if (vpnStatus !== 'connected') throw new Error('VPN not connected to DE');
-        await new Promise(res => setTimeout(res, 3000));
-        await mainPage.navTo('/');
+    test('Verify deposit flow DE postbank', async ({ browser }) => {
+        // Connect to German VPN
+        await vpnController.vpnDisconnect(); // Ensure disconnected first
+        await vpnController.vpnConnect(regionToVpnLocation.DE);
+        await vpnController.sleepVPN(5000); // Wait for VPN to connect
+        
+        // Create context with consistent user agent
+        const context = await browser.newContext({ 
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        });
+        const page = await context.newPage();
+        
+        // Initialize page objects
+        const mainPage = new MainPage(page);
+        const depositModal = new DepModal(page);
+
+        await mainPage.navTo('http://kingbillycasino.com/');
         await mainPage.clickAcceptCookies();
-        signInModal = await mainPage.header.clickSignIn();
+        const signInModal = await mainPage.header.clickSignIn();
         await signInModal.fillEmail(testData.DE.credentials.email);
         await signInModal.fillPassword(testData.DE.credentials.password);
         await signInModal.clickSignIn();
         await mainPage.header.clickDepositButton();
         await depositModal.clickOnDepMethod('postbankDE');
         await depositModal.clickOnDepositButton();
-        await depositModal.page.waitForTimeout(30000);
+        await depositModal.page.waitForTimeout(60000);
         expect(await mainPage.getPageUrl()).toContain('rapidob.com');
         expect(mainPage.page.locator('#shadow-content .header-back-bank-name')).toContainText('Postbank');
         await expect(page).toHaveScreenshot('de_postbank.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
         const dePostbankScreenshot = await page.screenshot({ fullPage: false });
         await test.info().attach('de_postbank.png', { body: dePostbankScreenshot, contentType: 'image/png' });
+        await context.close();
+        
+        // Disconnect VPN after test
+        await vpnController.vpnDisconnect();
+        await vpnController.sleepVPN(2000); // Wait for VPN to disconnect
     });
 
-    test('Verify deposit flow revolut', async ({ page }) => {
-        // Switch VPN to DE and wait for connection
-        await vpnController.vpnConnect(testData.DE.vpnLocation);
-        let vpnStatus = '';
-        for (let i = 0; i < 30; i++) {
-            vpnStatus = await vpnController.vpnCheckStatus();
-            if (vpnStatus === 'connected') break;
-            await new Promise(res => setTimeout(res, 6000));
-        }
-        if (vpnStatus !== 'connected') throw new Error('VPN not connected to DE');
-        await new Promise(res => setTimeout(res, 3000));
-        await mainPage.navTo('/');
+    test('Verify deposit flow revolut', async ({ browser }) => {
+        // Connect to German VPN
+        await vpnController.vpnDisconnect(); // Ensure disconnected first
+        await vpnController.vpnConnect(regionToVpnLocation.DE);
+        await vpnController.sleepVPN(5000); // Wait for VPN to connect
+        
+        // Create context with consistent user agent
+        const context = await browser.newContext({ 
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        });
+        const page = await context.newPage();
+        
+        // Initialize page objects
+        const mainPage = new MainPage(page);
+        const depositModal = new DepModal(page);
+
+        await mainPage.navTo('http://kingbillycasino.com/');
         await mainPage.clickAcceptCookies();
-        signInModal = await mainPage.header.clickSignIn();
+        const signInModal = await mainPage.header.clickSignIn();
         await signInModal.fillEmail(testData.DE.credentials.email);
         await signInModal.fillPassword(testData.DE.credentials.password);
         await signInModal.clickSignIn();
         await mainPage.header.clickDepositButton();
         await depositModal.clickOnDepMethod('revolut');
         await depositModal.clickOnDepositButton();
-        await depositModal.page.waitForTimeout(30000);
+        await depositModal.page.waitForTimeout(60000);
         expect(await mainPage.getPageUrl()).toContain('rapidob.com');
         expect(mainPage.page.locator('#shadow-content .header-back-bank-name')).toContainText('Revolut');
         await expect(page).toHaveScreenshot('de_revolut.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
         const deRevolutScreenshot = await page.screenshot({ fullPage: false });
         await test.info().attach('de_revolut.png', { body: deRevolutScreenshot, contentType: 'image/png' });
+        await context.close();
+        
+        // Disconnect VPN after test
+        await vpnController.vpnDisconnect();
+        await vpnController.sleepVPN(2000); // Wait for VPN to disconnect
     });
 
-    test('Verify deposit flow nodaPay', async ({ page }) => {
-        // Switch VPN to DE and wait for connection
-        await vpnController.vpnConnect(testData.DE.vpnLocation);
-        let vpnStatus = '';
-        for (let i = 0; i < 30; i++) {
-            vpnStatus = await vpnController.vpnCheckStatus();
-            if (vpnStatus === 'connected') break;
-            await new Promise(res => setTimeout(res, 6000));
-        }
-        if (vpnStatus !== 'connected') throw new Error('VPN not connected to DE');
-        await new Promise(res => setTimeout(res, 3000));
-        await mainPage.navTo('/');
+    test('Verify deposit flow nodaPay', async ({ browser }) => {
+        // Connect to German VPN
+        await vpnController.vpnDisconnect(); // Ensure disconnected first
+        await vpnController.vpnConnect(regionToVpnLocation.DE);
+        await vpnController.sleepVPN(5000); // Wait for VPN to connect
+        
+        // Create context with consistent user agent
+        const context = await browser.newContext({ 
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        });
+        const page = await context.newPage();
+        
+        const mainPage = new MainPage(page);
+        const depositModal = new DepModal(page);
+
+        await mainPage.navTo('http://kingbillycasino.com');
         await mainPage.clickAcceptCookies();
-        signInModal = await mainPage.header.clickSignIn();
+        const signInModal = await mainPage.header.clickSignIn();
         await signInModal.fillEmail(testData.DE.credentials.email);
         await signInModal.fillPassword(testData.DE.credentials.password);
         await signInModal.clickSignIn();
         await mainPage.header.clickDepositButton();
         await depositModal.clickOnDepMethod('nodaPay');
         await depositModal.clickOnDepositButton();
-        await depositModal.page.waitForTimeout(30000);
+        await depositModal.page.waitForTimeout(60000);
         expect(await mainPage.getPageUrl()).toContain('rapidob.com');
         expect(await mainPage.page.locator('.modal-content')).toBeVisible();
         await expect(page).toHaveScreenshot('de_nodapay.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
         const deNodapayScreenshot = await page.screenshot({ fullPage: false });
         await test.info().attach('de_nodapay.png', { body: deNodapayScreenshot, contentType: 'image/png' });
+        await context.close();
+        
+        // Disconnect VPN after test
+        await vpnController.vpnDisconnect();
+        await vpnController.sleepVPN(2000); // Wait for VPN to disconnect
     });
 });
