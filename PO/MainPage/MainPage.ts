@@ -1,18 +1,14 @@
 import BasePage from "../BasePage/BasePage";
 import {Locator, Page} from "@playwright/test";
-import {IGameCategories} from "../../Interfaces/gameCategories";
-import SidebarMenu from "../../Components/SidebarMenu";
-import {DepModal} from "../../Components/DepModal";
-import SupportMessanger from "../../Components/SupportButton";
-import PromoSection from "./Component/PromoSection";
-import { axeScan } from "axe-playwright-report";
+
+
+
 
 
 export default class MainPage extends BasePage {
     private mainPage: Page
     private allProviders: Locator
     private providersBlock: Locator
-    public promoSection: PromoSection
 
     private subcategoryDropdown: Locator
     private categorySlider: Locator
@@ -38,7 +34,7 @@ export default class MainPage extends BasePage {
     private tableOnlineRoulette: Locator
     private recentGamesCategory: Locator
     protected gameItem: Locator
-    public gameCategories: IGameCategories
+
     private topGamesShowMoreButton: Locator
     private newGamesShowMoreButton: Locator
     private promoShowMoreButton: Locator
@@ -107,43 +103,6 @@ export default class MainPage extends BasePage {
         this.supportButton = page.locator(`body .intercom-lightweight-app-launcher-icon-open`)
         this.sliderRegForm = page.locator('.main-slide-anon__register-form')
 
-        this.promoSection = new PromoSection(this.page)
-
-        this.gameCategories = {
-            // this.lobby,
-            New:{
-                locator: this.new,
-                title: 'New online games'
-            },
-            Top: {
-                locator: this.top,
-                title: 'Top casino games'
-            },
-            Popular: {
-                locator: this.popular,
-                title: 'Popular'
-            },
-            KingsChoice: {
-                locator: this.kingsChoiceCategory,
-                title: "King's Choice"
-            },
-            Jackpots: {
-                locator: this.jackpots,
-                title: 'Casino jackpots'
-            },
-            Slots: {
-                locator: this.slots,
-                title: 'Slots'
-            },
-            Live: {
-                locator: this.live,
-                title: 'Live casino'
-            },
-            Table: {
-                locator: this.tableGames,
-                title: 'Casino table games'
-            }
-        }
 
         this.gameItemSelector = '.catalog__item'
 
@@ -229,15 +188,6 @@ export default class MainPage extends BasePage {
         await this.getItButton.nth(1).click()
     }
 
-    async clickOnSidebarButton(): Promise<SidebarMenu> {
-        await this.sidebarButton.click()
-        return new SidebarMenu(this.page)
-    }
-
-    async clickOnDepositAndPlayPostReg(): Promise<DepModal> {
-        await this.depositAndPlayPostReg.click()
-        return new DepModal(this.page)
-    }
 
     async getNumberOfTopWinnerGames(): Promise<number> {
         const numberOfGames = await this.page.evaluate(() => {
@@ -257,10 +207,7 @@ export default class MainPage extends BasePage {
         await this.topWinnerGame(index).click()
     }
 
-    async clickOnSupportButton(): Promise<SupportMessanger> {
-        await this.supportButton.click()
-        return new SupportMessanger(this.page)
-    }
+
 
     //accessors
 

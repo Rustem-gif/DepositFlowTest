@@ -17,6 +17,11 @@
   "description": "",
   "devDependencies": {
     "@playwright/test": "^1.54.1",
-    "@types/node": "^24.1.0"
+    "@slack/types": "^2.15.0",
+    "@types/node": "^24.1.0",
+    "playwright-slack-report": "^1.1.99"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1"
   }
 }
