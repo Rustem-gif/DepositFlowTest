@@ -18,7 +18,7 @@ test.describe("Deposit Flow Test", () => {
     const password = '193786Az()';
     let randomEmail: string;
 
-    test.skip('Verify deposit flow AU credit card', async ({ browser }) => {
+    test('Verify deposit flow AU credit card', async ({ browser }) => {
         // Connect to Australian VPN
         await vpnController.vpnDisconnect(); // Ensure disconnected first
         await vpnController.vpnConnect(regionToVpnLocation.AU);
@@ -113,7 +113,7 @@ test.describe("Deposit Flow Test", () => {
         await vpnController.sleepVPN(2000); // Wait for VPN to disconnect
     });
 
-    test.only('Verify deposit flow NZ credit card', async ({ browser }) => {
+    test('Verify deposit flow NZ credit card', async ({ browser }) => {
         // Connect to New Zealand VPN
         await vpnController.vpnDisconnect(); // Ensure disconnected first
         await vpnController.vpnConnect(regionToVpnLocation.NZ);

@@ -18,7 +18,7 @@ export const testData = {
             state: 'Australian Capital Territory',
             city: 'Blackwood',
             postalCode: '2345',
-            mobileNumber: '430 055 447'
+            mobileNumber: '430055447'
           },
           neoserf: {
             minAmount: 25
@@ -44,7 +44,7 @@ export const testData = {
             city: 'Blackwood',
             address: '123 Main St',
             postalCode: '7843',
-            mobileNumber: '21 123 4567'
+            mobileNumber: '211234567'
           },
           paysafecard: {
             accountId: 'test-paysafe-123'
@@ -70,7 +70,7 @@ export const testData = {
             state: 'New Brunswick',
             city: 'Blackwood',
             postalCode: 'K0G 0A0',
-            mobileNumber: '416 555 0123'
+            mobileNumber: '4165550123'
           },
           interac: {
             email: 'test.interac@example.com'
@@ -95,7 +95,7 @@ export const testData = {
             dob: '11/11/1990',
             city: 'Berlin',
             postalCode: '10176',
-            mobileNumber: '157 11345678'
+            mobileNumber: '15711345678'
           },
           noda: {
             email: 'test.noda@example.com'
