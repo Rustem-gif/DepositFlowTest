@@ -11,10 +11,15 @@ export class DepModal extends BaseComponent {
     private interac: Locator
     private creditCardCA: Locator
     private creditCardDE: Locator
-    private creditCardNumberInput: Locator
-    private cardHolderNameInput: Locator
-    private expiryDataInput: Locator
-    private cvvInput: Locator
+    private depositButton: Locator
+    private depModalError: Locator
+    private paysafeCardModal: Locator
+
+    //AU credit card locators
+    private auCreditCardNumberInput: Locator
+    private auCardHolderNameInput: Locator
+    private auExpiryDateInput: Locator
+    private auCvvInput: Locator
     private firstNameInput: Locator
     private lastNameInput: Locator
     private dateOfBirthInput: Locator
@@ -22,10 +27,8 @@ export class DepModal extends BaseComponent {
     private cityInput: Locator
     private addressInput: Locator
     private postalCodeInput: Locator
-    private mobileFormInput: Locator
-    private depositButton: Locator
-    private depModalError: Locator
-    private paysafeCardModal: Locator
+    private mobileNumberInput: Locator
+
     // NZ credit card specific locators
     private nzCardNumberInput: Locator
     private nzCardHolderNameInput: Locator
@@ -44,33 +47,41 @@ export class DepModal extends BaseComponent {
     private revolut: Locator
     private nodaPay: Locator
 
+    private caCardNumberInput: Locator
+    private caCardHolderNameInput: Locator
+    private caExpiryDateInput: Locator
+    private caCvvInput: Locator
+
     constructor(page: Page) {
         super(page);
 
         this.depModal = page.locator('.fast-deposit-modal')
         this.creditCardAU = page.locator("[data-method-id='devcode_devcode-creditcard-352_creditcard']")
         this.creditCardNZ = page.locator("[data-method-id='finteqhub_seamless_finteqhub_seamless-card-acquirer-278_card-acquirer']")
-        this.creditCardCA = page.locator("[data-method-id='devcode_devcode-creditcard-331_creditcard']")
+        this.creditCardCA = page.locator("[data-method-id='finteqhub_seamless_finteqhub_seamless-card-acquirer-380_card-acquirer']")
         this.creditCardDE = page.locator("[data-method-id='finteqhub_seamless_finteqhub_seamless-card-acquirer-313_card-acquirer']")
         this.neoserf = page.locator("[data-method-id='finteqhub_seamless_finteqhub_seamless-neosurf~neosurf-175_neosurf~neosurf']")
         this.paysafecard = page.locator("[data-method-id='finteqhub_seamless_finteqhub_seamless-skrill~skrill-paysafecard-300_skrill~skrill-paysafecard']")
         this.interac = page.locator("[data-method-id='finteqhub_seamless_finteqhub_seamless-interac~interac-316_interac~interac']")
-        this.creditCardNumberInput = page.locator('#encCreditcardNumber')
-        this.cardHolderNameInput = page.locator('.payment-dynamic-form__card-holder > input')
-        this.expiryDataInput = page.locator('#expiry_date')
-        this.cvvInput = page.locator('#encCvv')
-        this.firstNameInput = page.locator('#dynamic-form__first_name')
-        this.lastNameInput = page.locator('#dynamic-form__last_name')
-        this.dateOfBirthInput = page.locator('xpath=/html/body/div[2]/div/div[2]/div/div/div[2]/div[2]/div[4]/form/div/div[3]/div[1]/div/div/div/input')
-        this.stateSelect = page.locator('#dynamic-form__state')
-        this.cityInput = page.locator('#dynamic-form__city')
-        this.addressInput = page.locator('#dynamic-form__address')
-        this.postalCodeInput = page.locator('#dynamic-form__postal_code')
-        this.mobileFormInput = page.locator('#dynamic-form__mobile_phone-number')
 
         this.depositButton = page.locator('.payment-submit-default__button')
         this.depModalError = page.locator('#payment_common_error')
         this.paysafeCardModal = page.locator('.payments-lib-popup__content')
+
+        //AU credit card locators
+        this.auCreditCardNumberInput = page.locator('#encCreditcardNumber');
+        this.auCardHolderNameInput = page.locator('#cardHolder');
+        this.auExpiryDateInput = page.locator('#expiry_date');
+        this.auCvvInput = page.locator('#encCvv');
+        this.firstNameInput = page.locator('[name="first_name"]');
+        this.lastNameInput = page.locator('#dynamic-form__last_name');
+        this.dateOfBirthInput = page.locator('.Date--calendar__input');
+        this.stateSelect = page.locator('.select__input');
+        this.cityInput = page.locator('#dynamic-form__city');
+        this.addressInput = page.locator('#dynamic-form__address');
+        this.postalCodeInput = page.locator('#dynamic-form__postal_code');
+        this.mobileNumberInput = page.locator('#dynamic-form__mobile_phone-number');
+    
 
         // NZ credit card specific locators
         this.nzCardNumberInput = page.locator('.payment-dynamic-form__credit-card-number > input');
@@ -83,6 +94,12 @@ export class DepModal extends BaseComponent {
         this.nzAddressInput = page.locator('#dynamic-form__address');
         this.nzPostalCodeInput = page.locator('#dynamic-form__postal_code');
         this.nzMobileFormInput = page.locator('#dynamic-form__mobile_phone-number');
+
+        //CA credit card specific locators
+        this.caCardNumberInput = page.locator('#number');
+        this.caCardHolderNameInput = page.locator('#holder');
+        this.caExpiryDateInput = page.locator('#seamless_expiry_date');
+        this.caCvvInput = page.locator('#cvv');
 
         this.creditCardNumberInpuitNZ = this.nzCardNumberInput;
 
@@ -135,6 +152,7 @@ export class DepModal extends BaseComponent {
     }
 
     async clickOnDepositButton(): Promise<void> {
+        await this.depositButton.scrollIntoViewIfNeeded();
         await this.depositButton.click();
     }
 
@@ -159,7 +177,8 @@ export class DepModal extends BaseComponent {
         address,
         postalCode,
         mobileNumber,
-        isNZ = false
+        isNZ = false,
+        isCA = false
     }: {
         cardNumber?: string;
         cardHolderName?: string;
@@ -172,51 +191,50 @@ export class DepModal extends BaseComponent {
         postalCode?: string;
         mobileNumber?: string;
         isNZ?: boolean;
+        isCA?: boolean;
     }) {
-        if (isNZ) {
-            await this.fillCreditCardFieldNZ({
-                cardNumber,
-                cardHolderName,
-                expiryDate,
-                cvv,
-                firstName,
-                lastName,
-                city,
-                address,
-                postalCode,
-                mobileNumber
-            });
-            return;
-        }
-        if (cardNumber !== undefined && cardNumber !== null) {
-            await this.creditCardNumberInput.fill(cardNumber);
-        }
-        if (cardHolderName !== undefined && cardHolderName !== null) {
-            await this.cardHolderNameInput.fill(cardHolderName);
-        }
-        if (expiryDate !== undefined && expiryDate !== null) {
-            await this.expiryDataInput.fill(expiryDate);
-        }
-        if (cvv !== undefined && cvv !== null) {
-            await this.cvvInput.fill(cvv);
-        }
-        if (firstName !== undefined && firstName !== null) {
-            await this.firstNameInput.fill(firstName);
-        }
-        if (lastName !== undefined && lastName !== null) {
-            await this.lastNameInput.fill(lastName);
-        }
-        if (city !== undefined && city !== null) {
-            await this.cityInput.fill(city);
-        }
-        if (address !== undefined && address !== null) {
-            await this.addressInput.fill(address);
-        }
-        if (postalCode !== undefined && postalCode !== null) {
-            await this.postalCodeInput.fill(postalCode);
-        }
-        if (mobileNumber !== undefined && mobileNumber !== null) {
-            await this.mobileFormInput.fill(mobileNumber);
+        const region = isNZ ? 'NZ' : isCA ? 'CA' : 'AU';
+        
+        switch (region) {
+            case 'NZ':
+                await this.fillCreditCardFieldNZ({
+                    cardNumber,
+                    cardHolderName,
+                    expiryDate,
+                    cvv,
+                    firstName,
+                    lastName,
+                    city,
+                    address,
+                    postalCode,
+                    mobileNumber
+                });
+                break;
+            
+            case 'CA':
+                await this.fillCACreditCardFieldsCA({
+                    cardNumber,
+                    cardHolderName,
+                    expiryDate,
+                    cvv
+                });
+                break;
+            
+            case 'AU':
+            default:
+                await this.fillAUCreditCardFieldsAU({
+                    cardNumber,
+                    cardHolderName,
+                    expiryDate,
+                    cvv,
+                    firstName,
+                    lastName,
+                    city,
+                    address,
+                    postalCode,
+                    mobileNumber
+                });
+                break;
         }
     }
 
@@ -276,6 +294,90 @@ export class DepModal extends BaseComponent {
         }
     }
 
+    async fillCACreditCardFieldsCA({
+        cardNumber,
+        cardHolderName,
+        expiryDate,
+        cvv
+    }: {
+        cardNumber?: string;
+        cardHolderName?: string;
+        expiryDate?: string;
+        cvv?: string;
+    }) {
+        if (cardNumber !== undefined && cardNumber !== null) {
+            await this.caCardNumberInput.fill(cardNumber);
+        }
+        if (cardHolderName !== undefined && cardHolderName !== null) {
+            await this.caCardHolderNameInput.fill(cardHolderName);
+        }
+        if (expiryDate !== undefined && expiryDate !== null) {
+            await this.caExpiryDateInput.fill(expiryDate);
+        }
+        if (cvv !== undefined && cvv !== null) {
+            await this.caCvvInput.fill(cvv);
+        }
+    }
+
+    async fillAUCreditCardFieldsAU({
+        cardNumber,
+        cardHolderName,
+        expiryDate,
+        cvv,
+        firstName,
+        lastName,
+        city,
+        address,
+        postalCode,
+        mobileNumber,
+        dateOfBirth
+    }: {
+        cardNumber?: string;    
+        cardHolderName?: string;
+        expiryDate?: string;
+        cvv?: string;
+        firstName?: string;
+        lastName?: string;
+        city?: string;
+        address?: string;
+        postalCode?: string;
+        mobileNumber?: string;
+        dateOfBirth?: string;
+    }) { 
+        if (cardNumber !== undefined && cardNumber !== null) {
+            await this.auCreditCardNumberInput.fill(cardNumber);
+        }
+        if (cardHolderName !== undefined && cardHolderName !== null) {
+            await this.auCardHolderNameInput.fill(cardHolderName);
+        }
+        if (expiryDate !== undefined && expiryDate !== null) {
+            await this.auExpiryDateInput.fill(expiryDate);
+        }
+        if (cvv !== undefined && cvv !== null) {
+            await this.auCvvInput.fill(cvv);
+        }
+        if (firstName !== undefined && firstName !== null) {
+            await this.firstNameInput.fill(firstName);
+        }
+        if (lastName !== undefined && lastName !== null) {
+            await this.lastNameInput.fill(lastName);
+        }
+        if (city !== undefined && city !== null) {
+            await this.cityInput.fill(city);
+        }
+        if (address !== undefined && address !== null) {
+            await this.addressInput.fill(address);
+        }
+        if (postalCode !== undefined && postalCode !== null) {
+            await this.postalCodeInput.fill(postalCode);
+        }
+        if (mobileNumber !== undefined && mobileNumber !== null) {
+            await this.mobileNumberInput.fill(mobileNumber);
+        }
+        if (dateOfBirth !== undefined && dateOfBirth !== null) {
+            await this.dateOfBirthInput.fill(dateOfBirth);
+        }
+    }
 
     
     get getDepModalError() : Locator {

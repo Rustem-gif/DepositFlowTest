@@ -137,7 +137,7 @@ export default class Header extends BaseComponent {
         })
     }
 
-    async clickDepositButton(): Promise<DepModal> {
+    async  openDepositButton(): Promise<DepModal> {
         await this.depositButton.click()
         return new DepModal(this.page)
     }

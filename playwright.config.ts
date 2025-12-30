@@ -39,7 +39,7 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on',
     screenshot: 'on',
-    video: 'on',
+    video: 'retain-on-failure',
     
     /* Increase timeouts for VPN operations */
     navigationTimeout: 30000,

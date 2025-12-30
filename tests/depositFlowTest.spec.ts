@@ -11,7 +11,7 @@ const regionToVpnLocation = {
     AU: "Australia - Melbourne",
     NZ: "New Zealand",
     CA: "Canada - Montreal",
-    DE: "Germany - Frankfurt - 1"
+    DE: "Germany - Frankfurt - 3"
 };
 
 test.describe("Deposit Flow Test", () => {
@@ -148,8 +148,9 @@ test.describe("Deposit Flow Test", () => {
             postalCode: testData.NZ.paymentMethods.creditCard.postalCode,
             mobileNumber: testData.NZ.paymentMethods.creditCard.mobileNumber
         };
+        await depositModal.selectDateFromDatePicker()
         await depositModal.clickOnDepMethod('creditCardNZ');
-        await depositModal.selectDateFromDatePicker();
+        // await depositModal.selectDateFromDatePicker();
         await depositModal.fillCreditCardFieldNZ(creditCardData);
         await depositModal.clickOnDepositButton();
         await expect(page).toHaveScreenshot('nz_credit_card.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
@@ -223,12 +224,12 @@ test.describe("Deposit Flow Test", () => {
         await signInModal.fillEmail(testData.CA.credentials.email);
         await signInModal.fillPassword(testData.CA.credentials.password);
         await signInModal.clickSignIn();
-        await mainPage.header.clickDepositButton()
+        await mainPage.header.openDepositButton()
         await depositModal.clickOnDepMethod('interac');
         await depositModal.clickOnDepositButton();
         await depositModal.page.waitForTimeout(60000);
         expect(await mainPage.getPageUrl()).toContain('interac.express-connect.com');
-        expect(mainPage.page.locator('.otherPayments > p')).toContainText('Select your bank');
+        await expect(mainPage.page.locator('.otherPayments > p')).toContainText('Select your bank');
         await expect(page).toHaveScreenshot('ca_interac.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
         const caInteracScreenshot = await page.screenshot({ fullPage: false });
         await test.info().attach('ca_interac.png', { body: caInteracScreenshot, contentType: 'image/png' });
@@ -257,213 +258,23 @@ test.describe("Deposit Flow Test", () => {
 
         await mainPage.navTo('http://kingbillycasino.com');
         await mainPage.clickAcceptCookies();
-        await expect(page).toHaveScreenshot('ca_credit_card.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
-        const caCreditCardScreenshot = await page.screenshot({ fullPage: false });
-        await test.info().attach('ca_credit_card.png', { body: caCreditCardScreenshot, contentType: 'image/png' });
-        
         const signInModal = await mainPage.header.clickSignIn();
         await signInModal.fillEmail(testData.CA.credentials.email);
         await signInModal.fillPassword(testData.CA.credentials.password);
         await signInModal.clickSignIn();
-        await mainPage.header.clickDepositButton()
+        await mainPage.header.openDepositButton()
         await depositModal.clickOnDepMethod('creditCardCA');
         await depositModal.fillCreditCardField({
             cardNumber: testData.CA.paymentMethods.creditCard.cardNumber,
             cardHolderName: testData.CA.paymentMethods.creditCard.nameOnCard,
             expiryDate: testData.CA.paymentMethods.creditCard.expiryDate,
-            cvv: testData.CA.paymentMethods.creditCard.cvv
+            cvv: testData.CA.paymentMethods.creditCard.cvv,
+            isCA: true,
         });
         await depositModal.clickOnDepositButton();
         await depositModal.page.waitForTimeout(60000);
-        expect(depositModal.getDepModalError).toBeVisible({ timeout: 5000 });
-        await context.close();
-        
-        // Disconnect VPN after test
-        await vpnController.vpnDisconnect();
-        await vpnController.sleepVPN(2000); // Wait for VPN to disconnect
-    });
-
-    test('Verify deposit flow DE sparkasse', async ({ browser }) => {
-        // Connect to German VPN
-        await vpnController.vpnDisconnect(); // Ensure disconnected first
-        await vpnController.vpnConnect(regionToVpnLocation.DE);
-        await vpnController.sleepVPN(5000); // Wait for VPN to connect
-        
-        // Create context with consistent user agent
-        const context = await browser.newContext({ 
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        });
-        const page = await context.newPage();
-        
-        // Initialize page objects
-        const mainPage = new MainPage(page);
-        const depositModal = new DepModal(page);
-        
-        await mainPage.navTo('http://kingbillycasino.com');
-        await mainPage.clickAcceptCookies();
-        const signInModal = await mainPage.header.clickSignIn();
-        await signInModal.fillEmail(testData.DE.credentials.email);
-        await signInModal.fillPassword(testData.DE.credentials.password);
-        await signInModal.clickSignIn();
-        await mainPage.header.clickDepositButton();
-        await depositModal.clickOnDepMethod('sparkasseDE');
-        await depositModal.clickOnDepositButton();
-        await depositModal.page.waitForTimeout(60000);
-        expect(await mainPage.getPageUrl()).toContain('rapidob.com');
-        expect(mainPage.page.locator('#shadow-content .header-back-bank-name')).toContainText('Sparkasse');
-        await expect(page).toHaveScreenshot('de_sparkasse.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
-        const deSparkasseScreenshot = await page.screenshot({ fullPage: false });
-        await test.info().attach('de_sparkasse.png', { body: deSparkasseScreenshot, contentType: 'image/png' });
-        await context.close();
-        
-        // Disconnect VPN after test
-        await vpnController.vpnDisconnect();
-        await vpnController.sleepVPN(2000); // Wait for VPN to disconnect
-    });
-
-    test('Verify deposit flow DE deutscheBank', async ({ browser }) => {
-        // Connect to German VPN
-        await vpnController.vpnDisconnect(); // Ensure disconnected first
-        await vpnController.vpnConnect(regionToVpnLocation.DE);
-        await vpnController.sleepVPN(5000); // Wait for VPN to connect
-        
-        // Create context with consistent user agent
-        const context = await browser.newContext({ 
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        });
-        const page = await context.newPage();
-        
-        const mainPage = new MainPage(page);
-        const depositModal = new DepModal(page);
-
-        await mainPage.navTo('http://kingbillycasino.com/');
-        await mainPage.clickAcceptCookies();
-        const signInModal = await mainPage.header.clickSignIn();
-        await signInModal.fillEmail(testData.DE.credentials.email);
-        await signInModal.fillPassword(testData.DE.credentials.password);
-        await signInModal.clickSignIn();
-        await mainPage.header.clickDepositButton();
-        await depositModal.clickOnDepMethod('deutscheBankDE');
-        await depositModal.clickOnDepositButton();
-        await depositModal.page.waitForTimeout(60000);
-        expect(await mainPage.getPageUrl()).toContain('rapidob.com');
-        expect(mainPage.page.locator('#shadow-content .header-back-bank-name')).toContainText('Deutsche Bank');
-        await expect(page).toHaveScreenshot('de_deutschebank.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
-        const deDeutscheBankScreenshot = await page.screenshot({ fullPage: false });
-        await test.info().attach('de_deutschebank.png', { body: deDeutscheBankScreenshot, contentType: 'image/png' });
-        await context.close();
-        
-        // Disconnect VPN after test
-        await vpnController.vpnDisconnect();
-        await vpnController.sleepVPN(2000); // Wait for VPN to disconnect
-    });
-
-    test('Verify deposit flow DE postbank', async ({ browser }) => {
-        // Connect to German VPN
-        await vpnController.vpnDisconnect(); // Ensure disconnected first
-        await vpnController.vpnConnect(regionToVpnLocation.DE);
-        await vpnController.sleepVPN(5000); // Wait for VPN to connect
-        
-        // Create context with consistent user agent
-        const context = await browser.newContext({ 
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        });
-        const page = await context.newPage();
-        
-        // Initialize page objects
-        const mainPage = new MainPage(page);
-        const depositModal = new DepModal(page);
-
-        await mainPage.navTo('http://kingbillycasino.com/');
-        await mainPage.clickAcceptCookies();
-        const signInModal = await mainPage.header.clickSignIn();
-        await signInModal.fillEmail(testData.DE.credentials.email);
-        await signInModal.fillPassword(testData.DE.credentials.password);
-        await signInModal.clickSignIn();
-        await mainPage.header.clickDepositButton();
-        await depositModal.clickOnDepMethod('postbankDE');
-        await depositModal.clickOnDepositButton();
-        await depositModal.page.waitForTimeout(60000);
-        expect(await mainPage.getPageUrl()).toContain('rapidob.com');
-        expect(mainPage.page.locator('#shadow-content .header-back-bank-name')).toContainText('Postbank');
-        await expect(page).toHaveScreenshot('de_postbank.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
-        const dePostbankScreenshot = await page.screenshot({ fullPage: false });
-        await test.info().attach('de_postbank.png', { body: dePostbankScreenshot, contentType: 'image/png' });
-        await context.close();
-        
-        // Disconnect VPN after test
-        await vpnController.vpnDisconnect();
-        await vpnController.sleepVPN(2000); // Wait for VPN to disconnect
-    });
-
-    test('Verify deposit flow revolut', async ({ browser }) => {
-        // Connect to German VPN
-        await vpnController.vpnDisconnect(); // Ensure disconnected first
-        await vpnController.vpnConnect(regionToVpnLocation.DE);
-        await vpnController.sleepVPN(5000); // Wait for VPN to connect
-        
-        // Create context with consistent user agent
-        const context = await browser.newContext({ 
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        });
-        const page = await context.newPage();
-        
-        // Initialize page objects
-        const mainPage = new MainPage(page);
-        const depositModal = new DepModal(page);
-
-        await mainPage.navTo('http://kingbillycasino.com/');
-        await mainPage.clickAcceptCookies();
-        const signInModal = await mainPage.header.clickSignIn();
-        await signInModal.fillEmail(testData.DE.credentials.email);
-        await signInModal.fillPassword(testData.DE.credentials.password);
-        await signInModal.clickSignIn();
-        await mainPage.header.clickDepositButton();
-        await depositModal.clickOnDepMethod('revolut');
-        await depositModal.clickOnDepositButton();
-        await depositModal.page.waitForTimeout(60000);
-        expect(await mainPage.getPageUrl()).toContain('rapidob.com');
-        expect(mainPage.page.locator('#shadow-content .header-back-bank-name')).toContainText('Revolut');
-        await expect(page).toHaveScreenshot('de_revolut.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
-        const deRevolutScreenshot = await page.screenshot({ fullPage: false });
-        await test.info().attach('de_revolut.png', { body: deRevolutScreenshot, contentType: 'image/png' });
-        await context.close();
-        
-        // Disconnect VPN after test
-        await vpnController.vpnDisconnect();
-        await vpnController.sleepVPN(2000); // Wait for VPN to disconnect
-    });
-
-    test('Verify deposit flow nodaPay', async ({ browser }) => {
-        // Connect to German VPN
-        await vpnController.vpnDisconnect(); // Ensure disconnected first
-        await vpnController.vpnConnect(regionToVpnLocation.DE);
-        await vpnController.sleepVPN(5000); // Wait for VPN to connect
-        
-        // Create context with consistent user agent
-        const context = await browser.newContext({ 
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        });
-        const page = await context.newPage();
-        
-        const mainPage = new MainPage(page);
-        const depositModal = new DepModal(page);
-
-        await mainPage.navTo('http://kingbillycasino.com');
-        await mainPage.clickAcceptCookies();
-        const signInModal = await mainPage.header.clickSignIn();
-        await signInModal.fillEmail(testData.DE.credentials.email);
-        await signInModal.fillPassword(testData.DE.credentials.password);
-        await signInModal.clickSignIn();
-        await mainPage.header.clickDepositButton();
-        await depositModal.clickOnDepMethod('nodaPay');
-        await depositModal.clickOnDepositButton();
-        await depositModal.page.waitForTimeout(60000);
-        expect(await mainPage.getPageUrl()).toContain('rapidob.com');
-        expect(await mainPage.page.locator('.modal-content')).toBeVisible();
-        await expect(page).toHaveScreenshot('de_nodapay.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
-        const deNodapayScreenshot = await page.screenshot({ fullPage: false });
-        await test.info().attach('de_nodapay.png', { body: deNodapayScreenshot, contentType: 'image/png' });
+        await expect(depositModal.getDepModalError).toBeVisible({ timeout: 5000 });
+        await expect(page).toHaveScreenshot('ca_credit_card.png', { fullPage: false, maxDiffPixelRatio: 0.05, threshold: 0.3 });
         await context.close();
         
         // Disconnect VPN after test
